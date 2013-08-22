@@ -89,17 +89,6 @@ persona:
         channel_list:
           - #asgard
         persona: system
-    - class: Jarvis::Jabber
-      init:
-        alias: ${hostname}_xmpp
-        ip: ${hostname}.${domain}
-        port: 5222
-        hostname: ${domain}
-        username: ${hostname}
-        password: $ENV{'XMPP_PASSWORD'}
-        channel_list:
-          - asgard\@conference.${domain}/${hostname}
-        persona: system
 ...
 ################################################################################
 # a list of the personas I can spawn goes into known_personas 
@@ -107,7 +96,7 @@ $persona->{'persona'}->{'init'}->{'known_personas'} = YAML::Load(<< "...");
 ---
   - name: crunchy
     persona:
-      persist: 0
+      persist: 1
       class: Jarvis::Persona::Crunchy
       init:
         alias: crunchy
@@ -127,56 +116,14 @@ $persona->{'persona'}->{'init'}->{'known_personas'} = YAML::Load(<< "...");
           nickname: crunchy
           ircname: "Cap'n Crunchbot"
           server: 127.0.0.1
+          port: 8080
+          usessl: 1
+          username: $ENV{'IRC_ACCOUNT'}
+          password: $ENV{'IRC_PASSWORD'}
           domain: ${domain}
           channel_list:
             - #soggies
           persona: crunchy
-  - name: berry
-    persona:
-      persist: 0
-      class: Jarvis::Persona::Crunchy
-      init:
-        alias: berry
-        ldap_domain: ${domain}
-        ldap_binddn: cn=${hostname},ou=Hosts,${basedn}
-        ldap_bindpw: $ENV{'LDAP_PASSWORD'}
-        twitter_name: capncrunchbot
-        password: $ENV{'TWITTER_PASSWORD'}
-        retry: 150
-        start_twitter_enabled: 1
-    connectors:
-      - class: Jarvis::IRC
-        init:
-          alias: berry_irc
-          nickname: berry
-          ircname: "beta Cap'n Crunchbot"
-          server: 127.0.0.1
-          domain: ${domain}
-          channel_list:
-            - #twoggies
-          persona: berry
-  - name: jarvis
-    persona:
-      class: Jarvis::Persona::Jarvis
-      persist: 1
-      init:
-        alias: jarvis
-        connector: jarvis_irc
-        ldap_uri: $ENV{'LDAP_URI'}
-        ldap_domain: ${domain}
-        ldap_binddn: cn=${hostname},ou=Hosts,${basedn}
-        ldap_bindpw: $ENV{'LDAP_PASSWORD'}
-    connectors:
-      - class: Jarvis::IRC
-        init:
-          alias: jarvis_irc
-          persona: jarvis
-          nickname: jarvis
-          ircname: "Just Another Really Vigilant Infrastructure Sysadmin"
-          server: 127.0.0.1
-          domain: ${domain}
-          channel_list:
-            - #infrastructure
 ...
 ###############################################################################
 # Start the system persona

@@ -195,12 +195,23 @@ sub input{
                                                 $kernel->post($sender, 'authen', $msg);
                                                 last;
                                               };
+            /flip\s+(.*)\s+or\s+(.*)\s*\?*/   && do {
+                                                print STDERR "$1 || $2\n";
+                                                my $range = 100;
+                                                my $random_number = int(rand($range));
+                                                if ($random_number >= 50){
+                                                  $replies = [ $1 ];
+                                                } else {
+                                                  $replies = [ $2 ];
+                                                }
+                                              };
             /global business excellence/i
                                         && do { $replies = [ "Unison!" ]; last; };
             /unison/i                   && do { $replies = [ "The Way To Global Business Excellence!" ]; last; };
-            /beer/i                     && do { 
+            /beer/i                     && do {
+                                                $pirate=0;
                                                 eval {
-                                                       if($direct){ 
+                                                       if($direct){
                                                                     use LWP::Simple;
                                                                     use JSON qw( decode_json );
                                                                     my $url='http://api.brewerydb.com/v2/beer/random?key=4e1a74fd095edd633a56222807054c62';
@@ -209,30 +220,50 @@ sub input{
                                                                     $replies = [ $json->{'data'}{'name'} ];
                                                                   }
                                                      };
-                                                     warn $@ if $@;
-
+                                                     if($@){
+                                                         warn $@;
+                                                     }else{
+                                                         last;
+                                                     }
+                                                    
                                               };
-            /brewery/i                     && do { 
+            /c\[\]/i                    && do {
+                                                $pirate=0;
+                                                if($what =~ m/\\0_/){ $direct=1; }
+                                                eval {
+                                                       use LWP::Simple;
+                                                       use JSON qw( decode_json );
+                                                       my $url='http://api.brewerydb.com/v2/beer/random?key=4e1a74fd095edd633a56222807054c62';
+                                                       my $content = get( $url );
+                                                       my $json = decode_json($content);
+                                                       $replies = [ $json->{'data'}{'name'} ];
+                                                     };
+                                                     if($@){
+                                                         warn $@;
+                                                     }else{
+                                                         last;
+                                                     }
+                                                    
+                                              };
+            /brewery/i                 && do {
+                                                $pirate=0;
                                                 eval {
                                                        if($direct){
                                                                     use LWP::Simple;
                                                                     use JSON qw( decode_json );
-                                                                    my $url='http://api.brewerydb.com/v2/brewery/random?key=4e1a74fd095edd633a56222807054c62';
+                                                                    my $url='http://api.brewerydb.com/v2/brewery/random?key=4e1a74fd095edd633a56222807054c62'; 
                                                                     my $content = get( $url );
                                                                     my $json = decode_json($content);
                                                                     $replies = [ $json->{'data'}{'name'} ];
-                                                       } 
+                                                                  }
                                                      };
+                                                     if($@){
+                                                         warn $@;
+                                                     }else{
+                                                         last;
+                                                     }
                                                      warn $@ if $@;
-                                              };
-            /flip.*or.*/                && do {
-                                                my $range = 100;
-                                                my $random_number = int(rand($range));
-                                                if ($random_number >= 50){
-                                                  $replies = $1;
-                                                } else {
-                                                  $replies = $2;
-                                                }
+
                                               };
             /badger/                    && do { 
                                                 my $list = [ 
