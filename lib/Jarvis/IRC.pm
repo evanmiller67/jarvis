@@ -25,7 +25,12 @@ sub new {
     $self->{'must'} = ["channel_list","nickname","alias","persona","domain"];
 
     # hash of optional constructor elements (key), and their default (value) if not specified
-    $self->{'may'} = { };
+    $self->{'may'} = { 
+                       port => 6667,  
+                       username => undef,
+                       password => undef,
+                       usessl => undef, 
+                     };
 
     # set our required values fron the constructor or the defaults
     foreach my $attr (@{ $self->{'must'} }){
@@ -33,6 +38,7 @@ sub new {
              $self->{$attr} = $construct->{$attr};
          }else{
              print STDERR "Required session constructor attribute [$attr] not defined. ";
+             print Data::Dumper->Dump([{ construct => $construct, ENV => \%ENV }]);
              print STDERR "Unable to define ". __PACKAGE__ ." object\n";
              return undef;
          }
@@ -74,21 +80,23 @@ sub new {
                           'irc_quit',
                           'invite',
                         ];
-    #$self->{'states'} = { 
-    #                      start                => 'start',
-    #                      stop                 => 'stop',
-    #                      irc_default          => 'irc_default',
-    #                      irc_001              => 'irc_001',
-    #                      irc_public           => 'irc_public',
-    #                      irc_ping             => 'irc_ping',
-    #                      irc_msg              => 'irc_msg',
-    #                      irc_public_reply     => 'irc_public_reply',
-    #                      irc_private_reply    => 'irc_private_reply',
-    #                   };
+    print STDERR Data::Dumper->Dump([{
+                                                        nick     => $construct->{'nickname'},
+                                                        ircname  => $construct->{'ircname'},
+                                                        server   => $construct->{'server'},
+                                                        port     => $construct->{'port'},
+                                                        username => $construct->{'username'},
+                                                        password => $construct->{'password'},
+                                                        usessl   => $construct->{'usessl'},
+                                 }]);
     $self->{'irc_client'} = POE::Component::IRC->spawn(
-                                                        nick    => $construct->{'nickname'},
-                                                        ircname => $construct->{'ircname'},
-                                                        server  => $construct->{'server'},
+                                                        nick     => $construct->{'nickname'},
+                                                        ircname  => $construct->{'ircname'},
+                                                        server   => $construct->{'server'},
+                                                        port     => $construct->{'port'},
+                                                        username => $construct->{'username'},
+                                                        password => $construct->{'password'},
+                                                        usessl   => $construct->{'usessl'},
                                                       ) 
         or $self->error("Cannot connect to IRC $construct->{'server'} $!");
     return $self 
